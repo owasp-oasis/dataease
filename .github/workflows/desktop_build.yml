@@ -40,7 +40,7 @@ jobs:
         mvn clean package -Pdesktop -U -Dmaven.test.skip=true
         ls -alt core-backend/target
     - name: setup ossutil
-      uses: yizhoumo/setup-ossutil@v2
+      uses: yizhoumo/setup-ossutil@80f4dc3682862e71bd1ccc10acc2328f8d00a11a # v2
       with:
         ossutil-version: '1.7.19'
         endpoint: ${{ secrets.OSS_ENDPOINT }}
