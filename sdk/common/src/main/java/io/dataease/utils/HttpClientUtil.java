@@ -18,7 +18,6 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -29,7 +28,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +42,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,8 +56,8 @@ public class HttpClientUtil {
     private static final String HTTPS = "https";
 
     /**
-     * 系统参数 basic.ignoreSslVerify 的运行时开关：
-     * false（默认）启用严格 TLS 证书与主机名校验；true 为显式选择的兼容策略。
+     * Legacy basic.ignoreSslVerify setting retained for API compatibility.
+     * TLS certificate and hostname validation remains enabled for both values.
      */
     private static volatile boolean ignoreSslVerify = false;
 
@@ -163,12 +160,7 @@ public class HttpClientUtil {
     }
 
     private static SSLConnectionSocketFactory buildSslSocketFactory(boolean ignore) throws Exception {
-        if (!ignore) {
-            return new SSLConnectionSocketFactory(SSLContext.getDefault(), new String[]{"TLSv1.2", "TLSv1.3"}, null, new DefaultHostnameVerifier());
-        }
-        SSLContextBuilder builder = new SSLContextBuilder();
-        builder.loadTrustMaterial(null, (X509Certificate[] x509Certificates, String s) -> true);
-        return new SSLConnectionSocketFactory(builder.build(), new String[]{"TLSv1.1", "TLSv1.2", "SSLv3"}, null, NoopHostnameVerifier.INSTANCE);
+        return new SSLConnectionSocketFactory(SSLContext.getDefault(), new String[]{"TLSv1.2", "TLSv1.3"}, null, new DefaultHostnameVerifier());
     }
 
     public static boolean validateUrl(String url, HttpClientConfig config) {
